@@ -102,6 +102,13 @@ if ($completion->is_enabled()) {
                 height: 96px;
                 animation: spin 6s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
             }
+            @media (max-width: 600px) {
+                .qr-code-container {
+                width: 92%;
+                height: 92%;
+                padding: 10px;
+    }
+}
         </style>';
 
         // Generate a time-sensitive token.

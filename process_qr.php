@@ -31,9 +31,12 @@ $context = context_course::instance($courseid);
 require_login($courseid);
 require_capability('moodle/course:manageactivities', $context);
 
+$pix_url = new moodle_url('/local/qrcompletion/pix');
+
 $tokens = explode('|', $qrcode);
 if (count($tokens) != 3) {
-    echo 'Invalid QR Code format.<br>';
+    echo '<div id="qr-result-image"><img src="' . $pix_url . '/qr_invalid.png" alt="Invalid QR Code" style="margin-top: 10px;"><br>Invalid QR Code format.</div>';
+    error_log("Invalid QR Code format. QR code: $qrcode", 3, $CFG->dataroot . '/qrcompletion_logs.log');
     die();
 }
 
@@ -41,79 +44,63 @@ $securetoken = trim($tokens[0]);
 $timestamp = trim($tokens[1]);
 $userid = trim($tokens[2]);
 
-// Debugging output.
-echo "Secure Token from QR code: '$securetoken'<br>";
-echo "Timestamp from QR code: '$timestamp'<br>";
-echo "User ID from QR code: '$userid'<br>";
-
-// Validate the token (ensure it hasn't expired).
 $currenttime = time();
-echo "Current Time: '$currenttime'<br>";
-echo "Time Difference: '" . ($currenttime - $timestamp) . "' seconds<br>";
+$log_message = "Debug Info:\nSecure Token: $securetoken\nTimestamp: $timestamp\nUserid: $userid\nCourseid: $courseid\nCurrent Time: $currenttime\n";
 
 if (($currenttime - $timestamp) > 300) { // Token valid for 5 minutes.
-    echo 'QR Code has expired.<br>';
-    // Delete expired tokens.
+    echo '<div id="qr-result-image"><img src="' . $pix_url . '/qr_expired.png" alt="QR Code Expired" style="margin-top: 10px;"><br>QR Code has expired.</div>';
+    error_log($log_message . "QR Code has expired.\n", 3, $CFG->dataroot . '/qrcompletion_logs.log');
     $DB->delete_records_select('local_qrcompletion_tokens', 'timestamp < ?', [$currenttime - 300]);
     die();
 }
 
-// Validate the token.
 $secret = 'your-secret-key'; // Use the same secure secret key.
-$expectedtoken = hash_hmac('sha256', $userid . '|' . $courseid . '|' . $timestamp, $secret);
 
-// Debugging output.
-echo "Expected Token: '$expectedtoken'<br>";
+try {
+    $sql = "SELECT * FROM {local_qrcompletion_tokens}
+            WHERE userid = :userid
+              AND token = :token
+              AND timestamp = :timestamp";
+    $params = [
+        'userid' => $userid,
+        'token' => $securetoken,
+        'timestamp' => $timestamp,
+    ];
+    $record = $DB->get_record_sql($sql, $params);
 
-if (!hash_equals($expectedtoken, $securetoken)) {
-    echo 'Invalid QR Code.<br>';
-    die();
-}
+    if (!$record) {
+        throw new Exception('Invalid QR Code.');
+    }
 
-// Fetch the specific record.
-$sql = "SELECT * FROM {local_qrcompletion_tokens}
-        WHERE userid = :userid
-          AND courseid = :courseid
-          AND token = :token
-          AND timestamp = :timestamp";
-$params = [
-    'userid' => $userid,
-    'courseid' => $courseid,
-    'token' => $securetoken,
-    'timestamp' => $timestamp,
-];
-$record = $DB->get_record_sql($sql, $params);
+    $token_data = $userid . '|' . $record->courseid . '|' . $timestamp;
+    $expectedtoken = hash_hmac('sha256', $token_data, $secret);
+    $log_message .= "Token Data: $token_data\nExpected Token: $expectedtoken\n";
 
-// Debugging information.
-echo "SQL Query: $sql<br>";
-echo "Parameters: <br>";
-echo "UserID: '$userid'<br>";
-echo "CourseID: '$courseid'<br>";
-echo "Token: '$securetoken'<br>";
-echo "Timestamp: '$timestamp'<br>";
+    if (!hash_equals($expectedtoken, $securetoken)) {
+        echo '<div id="qr-result-image"><img src="' . $pix_url . '/qr_invalid.png" alt="Invalid QR Code" style="margin-top: 10px;"><br>Invalid QR Code.</div>';
+        error_log($log_message . "Token mismatch.\nExpected Token: $expectedtoken\nSecure Token: $securetoken\n", 3, $CFG->dataroot . '/qrcompletion_logs.log');
+        die();
+    }
 
-// Log the query.
-$logmessage = "SQL Query: $sql\nParameters: " . var_export($params, true) . "\n";
-file_put_contents($CFG->dataroot . '/qrcompletion_logs.log', $logmessage, FILE_APPEND);
+    if ($record->courseid != $courseid) {
+        $coursename = $DB->get_field('course', 'fullname', ['id' => $record->courseid]);
+        echo '<div id="qr-result-image"><img src="' . $pix_url . '/qr_wrong_course.png" alt="Wrong Course" style="margin-top: 10px;"><br>QR Code is valid, but for another course: ' . $coursename . '.</div>';
+        error_log($log_message . "QR Code is valid, but for another course: $coursename\n", 3, $CFG->dataroot . '/qrcompletion_logs.log');
+        die();
+    }
 
-if ($record) {
-    echo 'QR Code is valid and has been used.<br>';
-    echo "Record from DB:<br>";
-    echo "Token: '$record->token'<br>";
-    echo "Timestamp: '$record->timestamp'<br>";
-    // Compare the raw values directly.
-    echo "Raw Token Comparison: '" . strcmp($securetoken, $record->token) . "'<br>";
-    echo "Raw Timestamp Comparison: '" . strcmp($timestamp, $record->timestamp) . "'<br>";
+    $student = $DB->get_record('user', ['id' => $userid]);
+    if (!$student) {
+        echo '<div id="qr-result-image"><img src="' . $pix_url . '/qr_invalid.png" alt="Invalid QR Code" style="margin-top: 10px;"><br>Student not found.</div>';
+        error_log($log_message . "Student not found.\n", 3, $CFG->dataroot . '/qrcompletion_logs.log');
+        die();
+    }
+    $student_name = fullname($student);
 
-    // Log the found record.
-    $logmessage = "Record found: " . var_export($record, true) . "\n";
-    file_put_contents($CFG->dataroot . '/qrcompletion_logs.log', $logmessage, FILE_APPEND);
+    echo '<div id="qr-result-image"><img src="' . $pix_url . '/qr_valid.png" alt="Access Granted" style="margin-top: 10px;"><br>QR Code is valid. Access granted for ' . $student_name . '.</div>';
+    error_log($log_message . "QR Code validated. Access granted for $student_name.\n", 3, $CFG->dataroot . '/qrcompletion_logs.log');
 
-} else {
-    echo 'Invalid QR Code.<br>';
-    // Retrieve and display all tokens for further debugging.
-    $allrecords = $DB->get_records('local_qrcompletion_tokens', ['userid' => $userid, 'courseid' => $courseid]);
-    $logmessage = "All tokens for user '$userid' in course '$courseid': " . var_export($allrecords, true) . "\n";
-    file_put_contents($CFG->dataroot . '/qrcompletion_logs.log', $logmessage, FILE_APPEND);
-    echo $logmessage; // Optionally display the message for debugging.
+} catch (Exception $e) {
+    error_log("Error: " . $e->getMessage(), 3, $CFG->dataroot . '/qrcompletion_logs.log');
+    echo '<div id="qr-result-image"><img src="' . $pix_url . '/qr_invalid.png" alt="Error" style="margin-top: 10px;"><br>An error occurred: ' . $e->getMessage() . '</div>';
 }

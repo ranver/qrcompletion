@@ -41,13 +41,14 @@ echo html_writer::tag('h2', 'Scan and Validate QR Code');
 // Ensure the correct path to the html5-qrcode library.
 echo html_writer::script('', $CFG->wwwroot . '/local/qrcompletion/html5-qrcode/html5-qrcode.min.js');
 
-// Hidden field to store the course ID.
+// Hidden field to store the course ID
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'id' => 'course-id', 'value' => $courseid]);
 
 // HTML5 QR Code Scanner.
 echo html_writer::start_tag('div', ['id' => 'qr-reader', 'class' => 'qr-scanner']);
 echo html_writer::end_tag('div');
 echo html_writer::tag('div', '', ['id' => 'qr-reader-results']);
+echo html_writer::empty_tag('div', ['id' => 'qr-result-image']);
 
 // Closing the script tag for the previous JavaScript.
 echo html_writer::end_tag('script');
@@ -70,9 +71,11 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.onload = function() {
             if (xhr.status === 200) {
                 document.getElementById('qr-reader-results').innerHTML = xhr.responseText;
+                console.log('Server response:', xhr.responseText); // Debugging message
             } else {
                 document.getElementById('qr-reader-results').innerHTML = 
-                    'An error occurred while validating the QR code.';
+                    'An error occurred while validating the QR code. Status: ' + xhr.status + ', Response: ' + xhr.responseText;
+                console.log('Validation error:', xhr.status, xhr.responseText); // Debugging message
             }
         };
         xhr.send('qrcode=' + encodeURIComponent(decodedText) + '&courseid=' + encodeURIComponent(courseId));
@@ -81,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let html5QrcodeScanner = new Html5QrcodeScanner(
         'qr-reader', {
             fps: 10,
-            qrbox: 250,
+            qrbox: { width: 250, height: 250 },
             rememberLastUsedCamera: true,
             supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
         }
@@ -117,9 +120,14 @@ body {
     width: 100%;
 }
 
+#qr-result-image {
+    margin-top: 10px;
+    text-align: center;
+}
+
 @media (max-width: 600px) {
     .qr-scanner {
-        width: 90%;
+        width: 80%;
         padding: 10px;
     }
 }
