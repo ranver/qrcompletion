@@ -1,0 +1,19 @@
+/* styles.css */
+
+/* Ensure this CSS does not interfere with the QR code scanner */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.qr-scanner {
+    margin: 0 auto;
+    text-align: center;
+}
+
+#reader {
+    width: 300px; /* Adjust width as necessary */
+    margin: 0 auto;
+    border: 1px solid #ccc;
+    padding: 20px;
+}

@@ -15,17 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Settings for local_qrcompletion.
  *
  * @package    local_qrcompletion
  * @copyright  2024 Randy Vermaas
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->component = 'local_qrcompletion';
-$plugin->version = 2024060506; // Incremented version number.
-$plugin->requires = 2020061500; // Moodle 3.9.
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = 'v0.6';
+if ($hassiteconfig) {
+    $settings = new admin_settingpage('local_qrcompletion', get_string('pluginname', 'local_qrcompletion'));
+
+    // Icon file upload setting.
+    $settings->add(new admin_setting_configstoredfile('local_qrcompletion/icon',
+        get_string('icon', 'local_qrcompletion'),
+        get_string('icon_desc', 'local_qrcompletion'),
+        'icon'));
+
+    $ADMIN->add('localplugins', $settings);
+}
