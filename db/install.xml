@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLDB PATH="local/qrcompletion/db" VERSION="2024060503" COMMENT="XMLDB file for the QR Completion plugin">
+    <TABLES>
+        <TABLE NAME="local_qrcompletion_tokens" COMMENT="QR Completion Tokens">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+                <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="timestamp" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="token_unique" TYPE="unique" FIELDS="token"/>
+            </KEYS>
+        </TABLE>
+    </TABLES>
+</XMLDB>
