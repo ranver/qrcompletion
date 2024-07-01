@@ -42,6 +42,11 @@ $PAGE->set_context($context);
 $PAGE->set_title(get_string('qrcompletion', 'local_qrcompletion'));
 $PAGE->set_heading(get_string('qrcompletion', 'local_qrcompletion'));
 
+
+// Include CSS and JS files
+$PAGE->requires->css('/local/qrcompletion/css/qrcompletion.css');
+$PAGE->requires->js('/local/qrcompletion/js/qrcompletion.js');
+
 $completion = new completion_info($course);
 
 // Output the header.
@@ -73,43 +78,6 @@ if ($completion->is_enabled()) {
             ]);
 
         }
-
-        // CSS for animation and positioning.
-        echo '
-        <style>
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                50% { transform: rotate(360deg); }
-                100% { transform: rotate(0deg); }
-            }
-            .qr-code-container {
-                position: relative;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 400px;
-                height: 400px;
-                margin: 0 auto; /* Center the container horizontally */
-            }
-            .qr-code-container img.qr-code {
-                display: block;
-                width: 100%;
-                height: 100%;
-            }
-            .qr-code-container .spinner {
-                position: absolute;
-                width: 96px;
-                height: 96px;
-                animation: spin 6s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
-            }
-            @media (max-width: 600px) {
-                .qr-code-container {
-                width: 92%;
-                height: 92%;
-                padding: 10px;
-    }
-}
-        </style>';
 
         // Generate a time-sensitive token.
         $timestamp = time();

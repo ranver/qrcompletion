@@ -1,0 +1,73 @@
+/* qrvalidation.css */
+
+/* Ensure this CSS does not interfere with the QR code scanner */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.qr-scanner,
+#qr-result-image {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+#qr-reader {
+    width: 100%;
+}
+
+#qr-result-image img {
+    max-width: 100%;
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Layout adjustments for larger screens */
+@media (min-width: 768px) {
+    .qr-scan-container {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 20px; /* Space between the scanner and result image */
+    }
+
+    .qr-scan-container > div {
+        flex: 1;
+    }
+
+    #qr-result-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #qr-result-image img {
+        max-width: 100%;
+        height: auto; /* Maintain aspect ratio */
+    }
+}
+
+/* Layout for smaller screens */
+@media (max-width: 767px) {
+    .qr-scan-container {
+        display: block;
+    }
+
+    #qr-result-image {
+        margin-top: 10px;
+    }
+
+    #qr-result-image img {
+        max-width: 100%;
+        height: auto; /* Maintain aspect ratio */
+    }
+}
+
+/* Hide the info icon */
+img[alt="Info icon"] {
+    display: none !important;
+}

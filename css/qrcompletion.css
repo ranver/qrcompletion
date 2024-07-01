@@ -1,0 +1,84 @@
+/* qrcompletion.css */
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+}
+.qr-code-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto; /* Center the container horizontally */
+}
+.qr-code-container img.qr-code {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer; /* Make the QR code clickable */
+}
+.qr-code-container .spinner {
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    animation: spin 6s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8); /* Black with opacity */
+    justify-content: center; /* Center the modal content */
+    align-items: center; /* Center the modal content */
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    position: relative; /* Ensure the close button is positioned correctly */
+}
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+.modal img {
+    width: 100%;
+}
+.modal .spinner {
+    display: block;
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    top: 10px; /* Adjust this value to position the spinner correctly */
+    right: 10px; /* Adjust this value to position the spinner correctly */
+    animation: spin 6s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+@media (max-width: 600px) {
+    .qr-code-container {
+    width: 95%;
+    height: 95%;
+    padding: 10px;
+    }
+}
