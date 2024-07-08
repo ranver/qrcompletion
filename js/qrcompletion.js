@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     qrCode.onclick = function() {
         const qrCodeSrc = qrCode.src;
-        const spinnerHtml = '<div class="spinner" style="border: 4px solid rgba(0, 0, 0, 0.1); border-left: 4px solid #000; border-radius: 50%;"></div>';
-        modalContent.innerHTML = '<img src="' + qrCodeSrc + '" alt="QR Code" style="width: 100%;">' + spinnerHtml;
+        const spinnerHtml = '<div class="spinner"></div>';
+        modalContent.innerHTML = '<div style="position: relative;"><img src="' + qrCodeSrc + '" alt="QR Code" style="width: 100%;">' + spinnerHtml + '</div>';
         modal.style.display = 'flex';
         if (window.brightness && typeof window.brightness.setBrightness === 'function') {
             window.brightness.setBrightness(1.0); // Set brightness to maximum if supported

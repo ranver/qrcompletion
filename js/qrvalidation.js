@@ -1,5 +1,3 @@
-// qrvalidation.js
-
 document.addEventListener('DOMContentLoaded', function() {
     const courseId = document.getElementById('course-id').value;
     const processQrUrl = M.cfg.wwwroot + '/local/qrcompletion/process_qr.php';
@@ -12,11 +10,19 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                document.getElementById('qr-reader-results').innerHTML = xhr.responseText;
+                const qrReaderResults = document.getElementById('qr-reader-results');
+                qrReaderResults.innerHTML = ''; // Clear previous results
+
+                // Create and display the new result image
+                const resultImageDiv = document.createElement('div');
+                resultImageDiv.id = 'qr-result-image';
+                resultImageDiv.innerHTML = xhr.responseText;
+                qrReaderResults.appendChild(resultImageDiv);
+
                 console.log('Server response:', xhr.responseText); // Debugging message
             } else {
-                document.getElementById('qr-reader-results').innerHTML = 
-                    'An error occurred while validating the QR code. Status: ' + xhr.status + ', Response: ' + xhr.responseText;
+                const qrReaderResults = document.getElementById('qr-reader-results');
+                qrReaderResults.innerHTML = 'An error occurred while validating the QR code. Status: ' + xhr.status + ', Response: ' + xhr.responseText;
                 console.log('Validation error:', xhr.status, xhr.responseText); // Debugging message
             }
         };

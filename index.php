@@ -42,8 +42,7 @@ $PAGE->set_context($context);
 $PAGE->set_title(get_string('qrcompletion', 'local_qrcompletion'));
 $PAGE->set_heading(get_string('qrcompletion', 'local_qrcompletion'));
 
-
-// Include CSS and JS files
+// Include CSS and JS files.
 $PAGE->requires->css('/local/qrcompletion/css/qrcompletion.css');
 $PAGE->requires->js('/local/qrcompletion/js/qrcompletion.js');
 
@@ -76,7 +75,6 @@ if ($completion->is_enabled()) {
                 'class' => 'spinner',
                 'style' => 'width: 96px; height: 96px; animation: spin 6s cubic-bezier(0.28, -0.55, 0.28, -0.55) infinite;',
             ]);
-
         }
 
         // Generate a time-sensitive token.
@@ -124,12 +122,21 @@ if ($completion->is_enabled()) {
         if ($iconhtml) {
             echo $iconhtml;
         } else {
-            echo '<div class="spinner" style="border: 4px solid rgba(0, 0, 0, 0.1);
-                border-left: 4px solid #000; border-radius: 50%;"></div>';
+            echo '<div class="spinner"></div>';
         }
 
-
         echo '</div>';
+
+        // Modal structure.
+        echo html_writer::start_tag('div', ['id' => 'qr-modal', 'class' => 'modal']);
+        echo html_writer::start_tag('div', ['class' => 'modal-content']);
+        echo html_writer::start_tag('span', ['class' => 'close']);
+        echo '&times;';
+        echo html_writer::end_tag('span');
+        echo html_writer::tag('div', '', ['id' => 'modal-content']);
+        echo html_writer::end_tag('div');
+        echo html_writer::end_tag('div');
+
     } else {
         // Display message if course is not complete.
         echo html_writer::tag('p', get_string('coursenotcomplete', 'local_qrcompletion'));

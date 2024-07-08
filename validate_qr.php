@@ -35,9 +35,9 @@ $PAGE->set_context($context);
 $PAGE->set_title('QR Code Validation');
 $PAGE->set_heading('QR Code Validation');
 
-// Include the new CSS file for QR validation
+// Include the new CSS file for QR validation.
 $PAGE->requires->css('/local/qrcompletion/css/qrvalidation.css');
-// Include JS file
+// Include JS file.
 $PAGE->requires->js('/local/qrcompletion/js/qrvalidation.js');
 
 echo $OUTPUT->header();
@@ -46,16 +46,15 @@ echo html_writer::tag('h2', 'Scan and Validate QR Code');
 // Ensure the correct path to the html5-qrcode library.
 echo html_writer::script('', $CFG->wwwroot . '/local/qrcompletion/html5-qrcode/html5-qrcode.min.js');
 
-// Hidden field to store the course ID
+// Hidden field to store the course ID.
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'id' => 'course-id', 'value' => $courseid]);
 
-// HTML5 QR Code Scanner and Result Image
-echo '<div class="qr-scan-container">';
+// HTML5 QR Code Scanner and Result Image.
+echo html_writer::start_tag('div', ['class' => 'qr-scan-container']);
 echo html_writer::start_tag('div', ['id' => 'qr-reader', 'class' => 'qr-scanner']);
 echo html_writer::end_tag('div');
 echo html_writer::tag('div', '', ['id' => 'qr-reader-results']);
-echo html_writer::tag('div', '', ['id' => 'qr-result-image']);
-echo '</div>';
+echo html_writer::end_tag('div');
 
 // Output the footer.
 echo $OUTPUT->footer();

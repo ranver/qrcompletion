@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/.
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,17 @@
  */
 
 /**
+ * Logs messages to a specified log file.
+ *
+ * @param string $message The message to log.
+ */
+function qrcompletion_log($message) {
+    global $CFG;
+    $logfile = $CFG->dataroot . '/qrcompletion_logs.log'; // Adjust the path as needed.
+    file_put_contents($logfile, date('Y-m-d H:i:s') . ' - ' . $message . PHP_EOL, FILE_APPEND);
+}
+
+/**
  * Extends the course navigation for the QR Completion plugin.
  *
  * @param navigation_node $navigation The navigation node to extend.
@@ -30,29 +41,20 @@
  * @param context_course $context The context object.
  */
 function local_qrcompletion_extend_navigation_course($navigation, $course, $context) {
-    // Debugging: Log function call.
-    mtrace('local_qrcompletion_extend_navigation_course called');
-
     if (has_capability('local/qrcompletion:view', $context)) {
-        // Debugging: Log capability check.
-        mtrace('User has local/qrcompletion:view capability');
-
+        qrcompletion_log('User has local/qrcompletion:view capability for course ID: ' . $course->id);
         $url = new moodle_url('/local/qrcompletion/index.php', ['id' => $course->id]);
         $navigation->add(get_string('qrcompletion', 'local_qrcompletion'), $url);
     } else {
-        // Debugging: Log missing capability.
-        mtrace('User does not have local/qrcompletion:view capability');
+        qrcompletion_log('User does not have local/qrcompletion:view capability for course ID: ' . $course->id);
     }
 
     if (has_capability('moodle/course:manageactivities', $context)) {
-        // Debugging: Log capability check.
-        mtrace('User has moodle/course:manageactivities capability');
-
+        qrcompletion_log('User has moodle/course:manageactivities capability for course ID: ' . $course->id);
         $url = new moodle_url('/local/qrcompletion/validate_qr.php', ['courseid' => $course->id]);
         $navigation->add('Validate QR Code', $url, navigation_node::TYPE_SETTING, null, null, new pix_icon('i/valid', ''));
     } else {
-        // Debugging: Log missing capability.
-        mtrace('User does not have moodle/course:manageactivities capability');
+        qrcompletion_log('User does not have moodle/course:manageactivities capability for course ID: ' . $course->id);
     }
 }
 
