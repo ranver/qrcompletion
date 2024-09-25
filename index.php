@@ -55,7 +55,7 @@ echo html_writer::tag('h2', get_string('qrcompletion', 'local_qrcompletion'));
 // Check if course completion is enabled.
 if ($completion->is_enabled()) {
     if (has_capability('local/qrcompletion:view', $context) && $completion->is_course_complete($USER->id)) {
-        // Fetch and display the cat image.
+        // Fetch and display the icon image.
         $imagename = get_config('local_qrcompletion', 'icon');
         $fs = get_file_storage();
         $file = $fs->get_file(context_system::instance()->id, 'local_qrcompletion', 'icon', 0, '/', $imagename);
@@ -73,7 +73,7 @@ if ($completion->is_enabled()) {
             $iconhtml = html_writer::empty_tag('img', [
                 'src' => $imageurl,
                 'class' => 'spinner',
-                'style' => 'width: 96px; height: 96px; animation: spin 6s cubic-bezier(0.28, -0.55, 0.28, -0.55) infinite;',
+                // 'style' => 'width: 96px; height: 96px; animation: spin 6s cubic-bezier(0.28, -0.55, 0.28, -0.55) infinite;',
             ]);
         }
 

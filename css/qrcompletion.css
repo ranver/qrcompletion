@@ -27,7 +27,7 @@
     position: absolute;
     width: 96px;
     height: 96px;
-    animation: spin 6s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    animation: spin 6s cubic-bezier(0.28, -0.55, 0.28, -0.55) infinite;
 }
 
 .modal {
