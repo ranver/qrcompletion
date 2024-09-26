@@ -18,7 +18,6 @@
  * Language strings for the QR Completion plugin.
  *
  * @package   local_qrcompletion
- * @copyright 2024 Randy Vermaas
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -42,3 +41,14 @@ $string['access_granted'] = 'QR code is valid, access is granted';
 $string['student_name'] = 'Student Name';
 $string['no_qr_code'] = 'No QR code provided';
 $string['student_not_found'] = 'Student not found';
+$string['enableanimation'] = 'Enable animation';
+$string['enableanimation_desc'] = 'Enable or disable the animation for the icon.';
+
+$string['animationpreset'] = 'Animation preset';
+$string['animationpreset_desc'] = 'Select a predefined animation for the icon.';
+
+$string['preset_none'] = 'No animation (still image)';
+$string['preset_spin_slow'] = 'Slow spin (6s)';
+$string['preset_spin_fast'] = 'Fast spin (2s)';
+$string['preset_spin_back_and_forth'] = 'Spin back and forth';
+$string['preset_spin_accelerate_decelerate'] = 'Spin accelerate/decelerate';

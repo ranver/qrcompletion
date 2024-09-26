@@ -1,86 +1,94 @@
 /* qrcompletion.css */
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    50% { transform: rotate(360deg); }
-    100% { transform: rotate(0deg); }
-}
-
+/* Container for the QR code and icon */
 .qr-code-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative; /* Enables absolute positioning within this container */
     width: 300px;
     height: 300px;
-    margin: 0 auto; /* Center the container horizontally */
+    margin: 0 auto; /* Centers the container horizontally */
 }
 
+/* QR code image styling */
 .qr-code-container img.qr-code {
     display: block;
-    width: 100%;
-    height: 100%;
-    cursor: pointer; /* Make the QR code clickable */
+    width: 100%; /* Fills the container width */
+    height: 100%; /* Fills the container height */
 }
 
-.qr-code-container .spinner {
-    position: absolute;
+/* Base styles for the icon over the QR code */
+.icon-over-qr {
+    position: absolute; /* Positions the icon relative to the container */
+    top: 50%; /* Centers vertically */
+    left: 50%; /* Centers horizontally */
+    transform: translate(-50%, -50%); /* Adjusts the position to center */
     width: 96px;
     height: 96px;
-    animation: spin 6s cubic-bezier(0.28, -0.55, 0.28, -0.55) infinite;
+    pointer-events: none; /* Allows clicks to pass through to the QR code */
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.8); /* Black with opacity */
-    justify-content: center; /* Center the modal content */
-    align-items: center; /* Center the modal content */
+/* Slow spin animation */
+.spin-slow {
+    animation: spin 6s linear infinite;
 }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-    position: relative; /* Ensure the close button is positioned correctly */
+/* Fast spin animation */
+.spin-fast {
+    animation: spin 2s linear infinite;
 }
 
-.close {
-    color: #aaa;
+/* Spin back and forth animation */
+.spin-back-and-forth {
+    animation: spin-back-and-forth 4s ease-in-out infinite;
+}
+
+/* Spin with accelerate/decelerate */
+.spin-accelerate-decelerate {
+    animation: spin-accelerate-decelerate 4s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+/* Keyframes for spin animation */
+@keyframes spin {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Keyframes for spin-back-and-forth animation */
+@keyframes spin-back-and-forth {
+    0% {
+        transform: translate(-50%, -50%) rotate(-30deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(30deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(-30deg);
+    }
+}
+
+/* Keyframes for spin-accelerate-decelerate animation */
+@keyframes spin-accelerate-decelerate {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Spinner styles (fallback if no icon is available) */
+.spinner {
     position: absolute;
-    top: 10px;
-    right: 25px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-}
-
-.modal img {
-    width: 100%;
-}
-
-.modal .spinner {
-    display: block;
-    position: absolute;
-    width: 96px;
-    height: 96px;
-    top: 50%; /* Center the spinner vertically */
-    left: 50%; /* Center the spinner horizontally */
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    animation: spin 6s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    width: 96px;
+    height: 96px;
+    border: 16px solid #f3f3f3; /* Light grey border */
+    border-top: 16px solid #3498db; /* Blue border on top */
+    border-radius: 50%; /* Makes the spinner round */
+    animation: spin 2s linear infinite;
 }

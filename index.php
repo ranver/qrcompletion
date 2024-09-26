@@ -1,39 +1,28 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 //
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// ... [License and package comments] ...
 
 /**
  * QR Completion plugin main script.
  *
  * @package   local_qrcompletion
- * @copyright 2024 Randy Vermaas
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Include Moodle's configuration and necessary libraries.
 require_once('../../config.php');
 require_once($CFG->libdir . '/completionlib.php');
 require_once($CFG->dirroot . '/local/qrcompletion/phpqrcode/qrlib.php');
-require_once($CFG->dirroot . '/local/qrcompletion/qrscanlib.php');
 
+// Get the course ID from URL parameters.
 $courseid = required_param('id', PARAM_INT);
 
 // Ensure the user is logged in and has access to the course.
 require_login($courseid);
 $context = context_course::instance($courseid);
 
-// Retrieve course record from the database.
+// Retrieve the course record from the database.
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
 // Set up the page.
@@ -42,10 +31,14 @@ $PAGE->set_context($context);
 $PAGE->set_title(get_string('qrcompletion', 'local_qrcompletion'));
 $PAGE->set_heading(get_string('qrcompletion', 'local_qrcompletion'));
 
-// Include CSS and JS files.
+// Include CSS file.
 $PAGE->requires->css('/local/qrcompletion/css/qrcompletion.css');
-$PAGE->requires->js('/local/qrcompletion/js/qrcompletion.js');
 
+// Retrieve plugin settings.
+$enableanimation = get_config('local_qrcompletion', 'enableanimation');
+$animationpreset = get_config('local_qrcompletion', 'animationpreset');
+
+// Create a completion info instance for the course.
 $completion = new completion_info($course);
 
 // Output the header.
@@ -54,6 +47,7 @@ echo html_writer::tag('h2', get_string('qrcompletion', 'local_qrcompletion'));
 
 // Check if course completion is enabled.
 if ($completion->is_enabled()) {
+    // Check if the user has the capability and if the course is complete for the user.
     if (has_capability('local/qrcompletion:view', $context) && $completion->is_course_complete($USER->id)) {
         // Fetch and display the icon image.
         $imagename = get_config('local_qrcompletion', 'icon');
@@ -62,6 +56,7 @@ if ($completion->is_enabled()) {
 
         $iconhtml = '';
         if ($file) {
+            // Generate the URL for the icon image.
             $imageurl = moodle_url::make_pluginfile_url(
                 $file->get_contextid(),
                 $file->get_component(),
@@ -70,16 +65,48 @@ if ($completion->is_enabled()) {
                 $file->get_filepath(),
                 $file->get_filename()
             );
+
+            // Initialize animation class.
+            $animationclass = ''; // Default to no animation.
+
+            // Determine the CSS classes based on settings.
+            if ($enableanimation) {
+                switch ($animationpreset) {
+                    case 'spin_fast':
+                        $animationclass = 'spin-fast';
+                        break;
+                    case 'spin_back_and_forth':
+                        $animationclass = 'spin-back-and-forth';
+                        break;
+                    case 'spin_accelerate_decelerate':
+                        $animationclass = 'spin-accelerate-decelerate';
+                        break;
+                    case 'spin_slow':
+                        $animationclass = 'spin-slow';
+                        break;
+                    case 'none':
+                    default:
+                        $animationclass = ''; // No animation.
+                        break;
+                }
+            }
+
+            // Combine classes.
+            $iconclasses = 'icon-over-qr';
+            if ($animationclass != '') {
+                $iconclasses .= ' ' . $animationclass;
+            }
+
+            // Create the HTML for the icon image.
             $iconhtml = html_writer::empty_tag('img', [
                 'src' => $imageurl,
-                'class' => 'spinner',
-                // 'style' => 'width: 96px; height: 96px; animation: spin 6s cubic-bezier(0.28, -0.55, 0.28, -0.55) infinite;',
+                'class' => $iconclasses,
             ]);
         }
 
         // Generate a time-sensitive token.
         $timestamp = time();
-        $secret = 'your-secret-key'; // Use a secure secret key.
+        $secret = 'uQjy-yQJG-4LGY'; // Replace with a secure secret key.
         $token = hash_hmac('sha256', $USER->id . '|' . $courseid . '|' . $timestamp, $secret);
 
         // Store the token and timestamp in the database.
@@ -89,11 +116,13 @@ if ($completion->is_enabled()) {
         $record->token = $token;
         $record->timestamp = $timestamp;
 
+        // Start a transaction for database operations.
         $transaction = $DB->start_delegated_transaction();
         $insertresult = $DB->insert_record('local_qrcompletion_tokens', $record);
         if ($insertresult) {
             $transaction->allow_commit();
         } else {
+            // Roll back the transaction if insert fails.
             $transaction->rollback(
                 new moodle_exception(
                     'recordinsertfail',
@@ -110,32 +139,31 @@ if ($completion->is_enabled()) {
         $qrcodepath = $CFG->dataroot . '/qrcodes/' . $USER->id . '.png';
         QRcode::png($qrcontent, $qrcodepath, QR_ECLEVEL_H, 9); // Use high error correction level (H).
 
-        // Display the QR code and spinner.
+        // Display the QR code and icon.
         echo '<div class="qr-code-container">';
+
+        // Generate the URL for the QR code image.
         $imgurl = new moodle_url('/local/qrcompletion/serve_qrcode.php', [
             'userid' => $USER->id,
             'courseid' => $courseid,
         ]);
-        echo html_writer::empty_tag('img', ['src' => $imgurl, 'class' => 'qr-code', 'id' => 'qrcode']);
 
-        // Display the icon animation or fallback spinner.
+        // Display the QR code image.
+        echo html_writer::empty_tag('img', [
+            'src' => $imgurl,
+            'class' => 'qr-code',
+            'id' => 'qrcode',
+        ]);
+
+        // Display the icon over the QR code.
         if ($iconhtml) {
             echo $iconhtml;
         } else {
+            // If no icon is uploaded, display a default spinner or message.
             echo '<div class="spinner"></div>';
         }
 
-        echo '</div>';
-
-        // Modal structure.
-        echo html_writer::start_tag('div', ['id' => 'qr-modal', 'class' => 'modal']);
-        echo html_writer::start_tag('div', ['class' => 'modal-content']);
-        echo html_writer::start_tag('span', ['class' => 'close']);
-        echo '&times;';
-        echo html_writer::end_tag('span');
-        echo html_writer::tag('div', '', ['id' => 'modal-content']);
-        echo html_writer::end_tag('div');
-        echo html_writer::end_tag('div');
+        echo '</div>'; // Close qr-code-container div.
 
     } else {
         // Display message if course is not complete.
@@ -143,7 +171,7 @@ if ($completion->is_enabled()) {
     }
 } else {
     // Display message if course completion is not enabled.
-    echo html_writer::tag('p', 'Course completion is not enabled for this course.');
+    echo html_writer::tag('p', get_string('coursecompletionnotenabled', 'local_qrcompletion'));
 }
 
 // Output the footer.
